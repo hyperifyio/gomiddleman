@@ -1,6 +1,39 @@
 # gomiddleman
 
-Proxy between services written in Go
+`gomiddleman` is a secure, and efficient proxy service written in Go, designed 
+to facilitate secure communication between clients and backend services. 
+Operating as a Man-in-the-Middle (MitM) proxy, gomiddleman specializes in 
+handling mutual TLS (mTLS) connections, ensuring that all communications are 
+authenticated and encrypted without compromising on performance.
+
+## Quick Start Guide
+
+To get started with `gomiddleman`, download the latest release for your operating
+system and execute it with the necessary flags:
+
+```bash
+wget https://github.com/hyperifyio/gomiddleman/releases/download/v0.0.1/gomiddleman-v0.0.1-linux-amd64.zip
+unzip ./gomiddleman-v0.0.1-linux-amd64.zip
+cd gomiddleman-v0.0.1-linux-amd64
+./gomiddleman
+```
+
+For global installation:
+
+```
+sudo cp ./gomiddleman /usr/local/bin/gomiddleman
+```
+
+## Setting Up for Development
+
+To build `gomiddleman` from source:
+
+```bash
+git clone git@github.com:hyperifyio/gomiddleman.git
+cd gomiddleman
+make
+./gomiddleman
+```
 
 ## License
 
@@ -14,3 +47,17 @@ usage, including commercial applications. For full details, refer to the
 [LICENSE.md](LICENSE.md) file. 
 
 **Commercial usage licenses can be obtained under separate agreements.**
+
+## Usage and Configuration
+
+For usage and configuration options:
+
+```bash
+./gomiddleman --help
+```
+
+Output:
+
+```
+Usage of ./gomiddleman:
+```
