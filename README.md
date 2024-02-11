@@ -6,6 +6,8 @@ Operating as a Man-in-the-Middle (MitM) proxy, gomiddleman specializes in
 handling mutual TLS (mTLS) connections, ensuring that all communications are 
 authenticated and encrypted without compromising on performance.
 
+See our development status from [Issue 1](https://github.com/hyperifyio/gomiddleman/issues/1).
+
 ## Quick Start Guide
 
 To get started with `gomiddleman`, download the latest release for your operating
