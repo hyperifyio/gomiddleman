@@ -13,13 +13,18 @@ import (
 var (
 	listenPort = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxy listens")
 	target     = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "127.0.0.1:3000"), "target where to proxy connections")
+	certFile   = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxy certificate as PEM file")
+	keyFile    = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxy key as PEM file")
+	caFile     = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxy ca as PEM file")
 )
 
 func main() {
 
 	flag.Parse()
 
-	stopProxy := gomiddleman.StartProxy(*listenPort, *target)
+	tlsConfig := gomiddleman.LoadTLSConfig(*certFile, *keyFile, *caFile)
+
+	stopProxy := gomiddleman.StartProxy(*listenPort, *target, tlsConfig)
 	defer stopProxy()
 
 	// Setup signal handling for graceful shutdown
