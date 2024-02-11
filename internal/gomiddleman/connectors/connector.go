@@ -3,20 +3,28 @@
 package connectors
 
 import (
+	"crypto/rsa"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/connectionhandlers"
 	"net"
 	"net/url"
 )
 
 // Connector is an interface for connecting to a target server.
 type Connector interface {
-	Connect() (net.Conn, error)
+	Connect(handler connectionhandlers.ConnectionHandler) (net.Conn, error)
 	GetTarget() string
 	GetType() string
 }
 
-func NewConnector(target string, tlsConfig *tls.Config) (Connector, error) {
+func NewConnector(
+	target string,
+	tlsConfig *tls.Config,
+	caCert *x509.Certificate,
+	caPrivateKey *rsa.PrivateKey,
+) (Connector, error) {
 	var connector Connector
 	targetURL, err := url.Parse(target)
 	if err != nil {
@@ -26,10 +34,17 @@ func NewConnector(target string, tlsConfig *tls.Config) (Connector, error) {
 	switch targetURL.Scheme {
 
 	case "tcp", "http":
-		connector = NewTCPConnector(targetURL.Host)
+		connector = NewTCPConnector(
+			targetURL.Host,
+		)
 
 	case "tls", "https":
-		connector = NewTLSConnector(targetURL.Host, tlsConfig)
+		connector = NewTLSConnector(
+			targetURL.Host,
+			tlsConfig,
+			caCert,
+			caPrivateKey,
+		)
 
 	default:
 		return nil, fmt.Errorf("[NewConnector]: Unsupported target scheme: %s", targetURL.Scheme)

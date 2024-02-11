@@ -28,6 +28,7 @@ func TestProxyForwardingHTTPSToHTTP(t *testing.T) {
 		"../../cert.pem",
 		"../../key.pem",
 		caFile,
+		"../../ca-key.pem",
 		"../../client-cert.pem",
 		"../../client-key.pem",
 		caFile,
@@ -60,6 +61,7 @@ func TestProxyForwardingHTTPSToHTTPS(t *testing.T) {
 		"../../cert.pem",
 		"../../key.pem",
 		caFile,
+		"../../ca-key.pem",
 		"../../client-cert.pem",
 		"../../client-key.pem",
 		caFile,
@@ -89,6 +91,7 @@ func setupProxyTest(
 	certFile string,
 	keyFile string,
 	caFile string,
+	caKeyFile string,
 	connectorCertFile string,
 	connectorKeyFile string,
 	connectorCaFile string,
@@ -113,7 +116,15 @@ func setupProxyTest(
 		t.Fatalf("[setupProxyTest]: Failed to initialize listeners: %v", err)
 	}
 
-	connector, err := connectors.NewConnector(serverURL, connectorTlsConfig)
+	caCert := tlsutils.ReadCACertificateFile(caFile)
+	caPrivateKey := tlsutils.ReadCAKeyFile(caKeyFile)
+
+	connector, err := connectors.NewConnector(
+		serverURL,
+		connectorTlsConfig,
+		caCert,
+		caPrivateKey,
+	)
 	if err != nil {
 		t.Fatalf("[setupProxyTest]: Failed to initialize connector: %v", err)
 	}

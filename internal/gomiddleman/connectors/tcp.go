@@ -4,6 +4,7 @@ package connectors
 
 import (
 	"fmt"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/connectionhandlers"
 	"net"
 )
 
@@ -16,7 +17,7 @@ func NewTCPConnector(target string) *TCPConnector {
 }
 
 // Connect Logic to connect to a TCP target
-func (connector *TCPConnector) Connect() (net.Conn, error) {
+func (connector *TCPConnector) Connect(_ connectionhandlers.ConnectionHandler) (net.Conn, error) {
 	conn, err := net.Dial("tcp", connector.target)
 	if err != nil {
 		return nil, fmt.Errorf("[TCPConnector.Connect]: failed to connect to TCP target %s: %v", connector.target, err)

@@ -9,7 +9,11 @@ import (
 	"net"
 )
 
-func HandleConnection(clientConn net.Conn, handler connectionhandlers.ConnectionHandler, connector connectors.Connector) {
+func HandleConnection(
+	clientConn net.Conn,
+	handler connectionhandlers.ConnectionHandler,
+	connector connectors.Connector,
+) {
 
 	defer func() {
 		if err := clientConn.Close(); err != nil {
@@ -24,7 +28,7 @@ func HandleConnection(clientConn net.Conn, handler connectionhandlers.Connection
 	log.Printf("[handleConnection]: Accepted connection from %s ('%s', %s) to %s", clientConn.RemoteAddr(), handler.GetCommonName(), handler.GetSerialNumber(), connector.GetTarget())
 
 	// Use the connector to connect to the target
-	targetConn, err := connector.Connect()
+	targetConn, err := connector.Connect(handler)
 	if err != nil {
 		log.Printf("[handleConnection]: Failed to connect %s ('%s', %s) to target %s: %v", clientConn.RemoteAddr(), handler.GetCommonName(), handler.GetSerialNumber(), connector.GetTarget(), err)
 		return

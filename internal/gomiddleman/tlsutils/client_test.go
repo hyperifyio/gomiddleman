@@ -90,5 +90,5 @@ func TestGenerateClientCertificate(t *testing.T) {
 	if keyBlock.Type != "RSA PRIVATE KEY" {
 		t.Errorf("Expected RSA PRIVATE KEY, got %s", keyBlock.Type)
 	}
-	
+
 }

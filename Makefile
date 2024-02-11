@@ -2,17 +2,17 @@
 
 GOMIDDLEMAN_SOURCES := \
     ./internal/gomiddleman/connectionhandlers/connectionhandler.go \
-    ./internal/gomiddleman/connectionhandlers/tcpconnectionhandler.go \
-    ./internal/gomiddleman/connectionhandlers/tlsconnectionhandler.go \
+    ./internal/gomiddleman/connectionhandlers/tcp.go \
+    ./internal/gomiddleman/connectionhandlers/tls.go \
     ./internal/gomiddleman/connectors/connector.go \
-    ./internal/gomiddleman/connectors/tcpconnector.go \
-    ./internal/gomiddleman/connectors/tlsconnector.go \
+    ./internal/gomiddleman/connectors/tcp.go \
+    ./internal/gomiddleman/connectors/tls.go \
     ./internal/gomiddleman/listeners/listener.go \
-    ./internal/gomiddleman/listeners/tcplistener.go \
-    ./internal/gomiddleman/listeners/tlslistener.go \
+    ./internal/gomiddleman/listeners/tcp.go \
+    ./internal/gomiddleman/listeners/tls.go \
     ./internal/gomiddleman/tlsutils/loadtlsconfig.go \
-    ./internal/gomiddleman/proxy/forwardtraffic.go \
-    ./internal/gomiddleman/proxy/handleconnection.go \
+    ./internal/gomiddleman/proxyutils/forwardtraffic.go \
+    ./internal/gomiddleman/proxyutils/handleconnection.go \
     ./internal/gomiddleman/proxy.go \
     ./cmd/gomiddleman/main.go
 

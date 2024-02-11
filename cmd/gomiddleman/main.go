@@ -17,12 +17,13 @@ import (
 )
 
 var (
-	listenerType = flag.String("type", getEnvOrDefault("GOMIDDLEMAN_TYPE", "tls"), "type of proxyutils (tcp or tls)")
-	listenPort   = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxyutils listens")
-	target       = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "http://localhost:3000"), "target where to proxyutils connections")
-	certFile     = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxyutils certificate as PEM file")
-	keyFile      = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxyutils key as PEM file")
-	caFile       = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxyutils ca as PEM file")
+	listenerType = flag.String("type", getEnvOrDefault("GOMIDDLEMAN_TYPE", "tls"), "type of proxy (tcp or tls)")
+	listenPort   = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxy listens")
+	target       = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "http://localhost:3000"), "target where to proxy connections")
+	certFile     = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxy certificate as PEM file")
+	keyFile      = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxy key as PEM file")
+	caFile       = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxy ca as PEM file")
+	caKeyFile    = flag.String("ca-key", getEnvOrDefault("GOMIDDLEMAN_CA_KEY_FILE", "ca-key.pem"), "proxy ca as PEM file")
 )
 
 func main() {
@@ -33,25 +34,35 @@ func main() {
 
 	listenAddr := fmt.Sprintf(":%s", *listenPort)
 
-	tlsConfig := tlsutils.LoadTLSConfig(*certFile, *keyFile, *caFile)
+	listenerTlsConfig := tlsutils.LoadTLSConfig(*certFile, *keyFile, *caFile)
 
-	listener, err := listeners.NewListener(*listenerType, listenAddr, tlsConfig)
+	listener, err := listeners.NewListener(*listenerType, listenAddr, listenerTlsConfig)
 	if err != nil {
-		log.Fatalf("Failed to initialize proxyutils: %v", err)
+		log.Fatalf("[main]: Failed to initialize proxy: %v", err)
 	}
 	defer func() {
 		if err := listener.Close(); err != nil {
-			log.Fatalf("Failed to close listener: %v", err)
+			log.Fatalf("[main]: Failed to close listener: %v", err)
 		}
 	}()
 
-	connector, err := connectors.NewConnector(*target, tlsConfig)
+	connectorTlsConfig := tlsutils.LoadTLSConfig("", "", *caFile)
+
+	caCert := tlsutils.ReadCACertificateFile(*caFile)
+	caPrivateKey := tlsutils.ReadCAKeyFile(*caKeyFile)
+
+	connector, err := connectors.NewConnector(
+		*target,
+		connectorTlsConfig,
+		caCert,
+		caPrivateKey,
+	)
 	if err != nil {
-		log.Fatalf("Failed to initialize target connector: %v", err)
+		log.Fatalf("[main]: Failed to initialize target connector: %v", err)
 	}
 
 	if err := gomiddleman.StartProxy(listener, connector); err != nil {
-		log.Fatalf("Error when starting the proxyutils: %v", err)
+		log.Fatalf("[main]: Error when starting the proxy: %v", err)
 	}
 
 	// Setup signal handling for graceful shutdown
@@ -60,9 +71,9 @@ func main() {
 
 	<-shutdown
 
-	log.Println("Shutting down proxyutils...")
+	log.Println("Shutting down proxy...")
 	if err := listener.Close(); err != nil {
-		log.Printf("Failed to close listener: %v", err)
+		log.Printf("[main]: Failed to close listener: %v", err)
 	}
 	wg.Wait()
 

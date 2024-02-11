@@ -9,24 +9,36 @@ import (
 	"os"
 )
 
-func LoadTLSConfig(certFile, keyFile string, caFile string) *tls.Config {
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		log.Fatalf("[LoadTLSConfig]: Failed to load serverutils certificate and key: %v", err)
-	}
+func LoadTLSConfig(
+	certFile,
+	keyFile,
+	caFile string,
+) *tls.Config {
+	var certificates []tls.Certificate
 
-	caCert, err := os.ReadFile(caFile)
-	if err != nil {
-		log.Fatalf("[LoadTLSConfig]: Failed to load CA certificate: %v", err)
+	if certFile != "" && keyFile != "" {
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Fatalf("[LoadTLSConfig]: Failed to load serverutils certificate and key: %v", err)
+		}
+		certificates = append(certificates, cert)
 	}
 
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
+	if caFile != "" {
+		caCert, err := os.ReadFile(caFile)
+		if err != nil {
+			log.Fatalf("[LoadTLSConfig]: Failed to load CA certificate: %v", err)
+		}
+		caCertPool.AppendCertsFromPEM(caCert)
+	}
 
-	return &tls.Config{
-		Certificates: []tls.Certificate{cert},
+	tlsConfig := &tls.Config{
+		Certificates: certificates,
 		RootCAs:      caCertPool,
 		ClientCAs:    caCertPool,
 		ClientAuth:   tls.RequireAndVerifyClientCert,
 	}
+
+	return tlsConfig
 }
