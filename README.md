@@ -60,4 +60,20 @@ Output:
 
 ```
 Usage of ./gomiddleman:
+  -ca string
+    	proxy ca as PEM file (default "ca.pem")
+  -cert string
+    	proxy certificate as PEM file (default "cert.pem")
+  -client-ca string
+    	CA file to use for dynamic client certificate generation (default "ca.pem")
+  -client-ca-key string
+    	CA key to use for dynamic client certificate generation (default "ca-key.pem")
+  -key string
+    	proxy key as PEM file (default "key.pem")
+  -port string
+    	port on which the proxy listens (default "8080")
+  -target string
+    	target where to proxy connections (default "http://localhost:3000")
+  -type string
+    	type of proxy (tcp or tls) (default "tls")
 ```

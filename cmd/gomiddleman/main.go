@@ -17,13 +17,14 @@ import (
 )
 
 var (
-	listenerType = flag.String("type", getEnvOrDefault("GOMIDDLEMAN_TYPE", "tls"), "type of proxy (tcp or tls)")
-	listenPort   = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxy listens")
-	target       = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "http://localhost:3000"), "target where to proxy connections")
-	certFile     = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxy certificate as PEM file")
-	keyFile      = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxy key as PEM file")
-	caFile       = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxy ca as PEM file")
-	caKeyFile    = flag.String("ca-key", getEnvOrDefault("GOMIDDLEMAN_CA_KEY_FILE", "ca-key.pem"), "proxy ca as PEM file")
+	listenerType    = flag.String("type", getEnvOrDefault("GOMIDDLEMAN_TYPE", "tls"), "type of proxy (tcp or tls)")
+	listenPort      = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxy listens")
+	target          = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "http://localhost:3000"), "target where to proxy connections")
+	certFile        = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxy certificate as PEM file")
+	keyFile         = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxy key as PEM file")
+	caFile          = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxy ca as PEM file")
+	clientCaFile    = flag.String("client-ca", getEnvOrDefault("GOMIDDLEMAN_CLIENT_CA_FILE", *caFile), "CA file to use for dynamic client certificate generation")
+	clientCaKeyFile = flag.String("client-ca-key", getEnvOrDefault("GOMIDDLEMAN_CLIENT_CA_KEY_FILE", "ca-key.pem"), "CA key to use for dynamic client certificate generation")
 )
 
 func main() {
@@ -48,14 +49,14 @@ func main() {
 
 	connectorTlsConfig := tlsutils.LoadTLSConfig("", "", *caFile)
 
-	caCert := tlsutils.ReadCACertificateFile(*caFile)
-	caPrivateKey := tlsutils.ReadCAKeyFile(*caKeyFile)
+	dynamicCaCert := tlsutils.ReadCACertificateFile(*clientCaFile)
+	dynamicCaPrivateKey := tlsutils.ReadCAKeyFile(*clientCaKeyFile)
 
 	connector, err := connectors.NewConnector(
 		*target,
 		connectorTlsConfig,
-		caCert,
-		caPrivateKey,
+		dynamicCaCert,
+		dynamicCaPrivateKey,
 	)
 	if err != nil {
 		log.Fatalf("[main]: Failed to initialize target connector: %v", err)
