@@ -16,7 +16,7 @@ import (
 
 // Test case for HTTPS to middleman to HTTP backend
 func TestProxyForwardingHTTPSToHTTP(t *testing.T) {
-	
+
 	listenPort := "8080"
 	caFile := "../../ca.pem"
 	testContent := "Hello from backend"

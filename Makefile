@@ -52,7 +52,7 @@ cert.pem: key.pem cert.conf cert-csr.pem ca.pem ca-key.pem
 	openssl x509 -req -in cert-csr.pem -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -days 3650 -sha256 -extfile cert.conf -extensions req_ext
 
 test: cert.pem client-cert.pem ca.pem
-	go test -v ./internal/gomiddleman
+	go test -v ./...
 
 clean:
 	rm -f gomiddleman cert.pem key.pem cert-csr.pem client-csr.pem client-key.pem client-cert.pem ca.pem ca-key.pem
