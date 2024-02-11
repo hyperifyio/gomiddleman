@@ -41,7 +41,7 @@ make
 
 Copyright (c) Heusala Group Ltd. All rights reserved.
 
-Each software release of `goeventd` is initially under the HG Evaluation and 
+Each software release of `gomiddleman` is initially under the HG Evaluation and 
 Non-Commercial License for the first two years. This allows use, modification, 
 and distribution for non-commercial and evaluation purposes only. Post this 
 period, the license transitions to the standard MIT license, permitting broader
