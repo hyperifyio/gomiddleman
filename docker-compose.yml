@@ -9,7 +9,7 @@ services:
     - "8080:8080"
     restart: unless-stopped
     environment:
-    - GOMIDDLEMAN_TARGET=http://localhost:3000
+    - GOMIDDLEMAN_TARGET=httputils://localhost:3000
     - GOMIDDLEMAN_PORT=8080
     depends_on:
     - gomiddleman-nats

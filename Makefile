@@ -1,19 +1,19 @@
 .PHONY: build clean tidy
 
 GOMIDDLEMAN_SOURCES := \
-    ./internal/gomiddleman/connectionhandler.go \
-    ./internal/gomiddleman/loadtlsconfig.go \
-    ./internal/gomiddleman/tcplistener.go \
-    ./internal/gomiddleman/connector.go \
+    ./internal/gomiddleman/connectionhandlers/connectionhandler.go \
+    ./internal/gomiddleman/connectionhandlers/tcpconnectionhandler.go \
+    ./internal/gomiddleman/connectionhandlers/tlsconnectionhandler.go \
+    ./internal/gomiddleman/connectors/connector.go \
+    ./internal/gomiddleman/connectors/tcpconnector.go \
+    ./internal/gomiddleman/connectors/tlsconnector.go \
+    ./internal/gomiddleman/listeners/listener.go \
+    ./internal/gomiddleman/listeners/tcplistener.go \
+    ./internal/gomiddleman/listeners/tlslistener.go \
+    ./internal/gomiddleman/tlsutils/loadtlsconfig.go \
+    ./internal/gomiddleman/proxy/forwardtraffic.go \
+    ./internal/gomiddleman/proxy/handleconnection.go \
     ./internal/gomiddleman/proxy.go \
-    ./internal/gomiddleman/tlsconnectionhandler.go \
-    ./internal/gomiddleman/forwardtraffic.go \
-    ./internal/gomiddleman/tlsconnector.go \
-    ./internal/gomiddleman/handleconnection.go \
-    ./internal/gomiddleman/tcpconnectionhandler.go \
-    ./internal/gomiddleman/tlslistener.go \
-    ./internal/gomiddleman/listener.go \
-    ./internal/gomiddleman/tcpconnector.go \
     ./cmd/gomiddleman/main.go
 
 all: build
@@ -37,7 +37,7 @@ client-key.pem:
 	openssl genrsa -out client-key.pem 4096
 
 client-csr.pem: client-key.pem
-	openssl req -new -key client-key.pem -out client-csr.pem -subj "/C=FI/ST=Tampere/L=Tampere/O=HyperifyIO/OU=Developers/CN=TestUser"
+	openssl req -new -key client-key.pem -out client-csr.pem -config client-cert.conf -extensions req_ext
 
 client-cert.pem: ca.pem ca-key.pem client-csr.pem
 	openssl x509 -req -in client-csr.pem -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out client-cert.pem -days 3650 -sha256
@@ -52,7 +52,7 @@ cert.pem: key.pem cert.conf cert-csr.pem ca.pem ca-key.pem
 	openssl x509 -req -in cert-csr.pem -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -days 3650 -sha256 -extfile cert.conf -extensions req_ext
 
 test: cert.pem client-cert.pem ca.pem
-	go test ./internal/gomiddleman
+	go test -v ./internal/gomiddleman
 
 clean:
 	rm -f gomiddleman cert.pem key.pem cert-csr.pem client-csr.pem client-key.pem client-cert.pem ca.pem ca-key.pem

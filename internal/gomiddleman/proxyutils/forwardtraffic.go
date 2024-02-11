@@ -1,6 +1,6 @@
 // Copyright (c) 2024. Heusala Group Oy <info@heusalagroup.fi>. All rights reserved.
 
-package gomiddleman
+package proxyutils
 
 import (
 	"io"
@@ -27,7 +27,7 @@ func ForwardTraffic(conn1, conn2 net.Conn) {
 	// Wait for forwarding to complete or an error to occur
 	for i := 0; i < 2; i++ {
 		if err := <-errChan; err != nil {
-			log.Printf("Error forwarding traffic: %v", err)
+			log.Printf("[ForwardTraffic]: Error forwarding traffic: %v", err)
 			break
 		}
 	}

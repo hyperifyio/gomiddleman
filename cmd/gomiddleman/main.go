@@ -6,8 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/hyperifyio/gomiddleman/internal/gomiddleman"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/connectors"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/listeners"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/tlsutils"
 	"log"
-	"net/url"
 	"os"
 	"os/signal"
 	"sync"
@@ -15,12 +17,12 @@ import (
 )
 
 var (
-	listenerType = flag.String("type", getEnvOrDefault("GOMIDDLEMAN_TYPE", "tls"), "type of proxy (tcp or tls)")
-	listenPort   = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxy listens")
-	target       = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "http://localhost:3000"), "target where to proxy connections")
-	certFile     = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxy certificate as PEM file")
-	keyFile      = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxy key as PEM file")
-	caFile       = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxy ca as PEM file")
+	listenerType = flag.String("type", getEnvOrDefault("GOMIDDLEMAN_TYPE", "tls"), "type of proxyutils (tcp or tls)")
+	listenPort   = flag.String("port", getEnvOrDefault("GOMIDDLEMAN_PORT", "8080"), "port on which the proxyutils listens")
+	target       = flag.String("target", getEnvOrDefault("GOMIDDLEMAN_TARGET", "http://localhost:3000"), "target where to proxyutils connections")
+	certFile     = flag.String("cert", getEnvOrDefault("GOMIDDLEMAN_CERT_FILE", "cert.pem"), "proxyutils certificate as PEM file")
+	keyFile      = flag.String("key", getEnvOrDefault("GOMIDDLEMAN_KEY_FILE", "key.pem"), "proxyutils key as PEM file")
+	caFile       = flag.String("ca", getEnvOrDefault("GOMIDDLEMAN_CA_FILE", "ca.pem"), "proxyutils ca as PEM file")
 )
 
 func main() {
@@ -29,46 +31,27 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	targetURL, err := url.Parse(*target)
-	if err != nil {
-		log.Fatalf("Invalid target URL: %v", err)
-	}
-
 	listenAddr := fmt.Sprintf(":%s", *listenPort)
 
-	var listener gomiddleman.Listener
+	tlsConfig := tlsutils.LoadTLSConfig(*certFile, *keyFile, *caFile)
 
-	// Choose the listener and connector based on the listener type
-	if *listenerType == "tls" {
-		tlsConfig := gomiddleman.LoadTLSConfig(*certFile, *keyFile, *caFile)
-		listener = gomiddleman.NewTLSListener(listenAddr, tlsConfig)
-	} else if *listenerType == "tcp" {
-		listener = gomiddleman.NewTCPListener(listenAddr)
-	} else {
-		log.Fatalf("Unsupported listener type: %s", *listenerType)
+	listener, err := listeners.NewListener(*listenerType, listenAddr, tlsConfig)
+	if err != nil {
+		log.Fatalf("Failed to initialize proxyutils: %v", err)
 	}
-	defer listener.Close()
-
-	var connector gomiddleman.Connector
-	switch targetURL.Scheme {
-
-	case "tcp", "http":
-		connector = gomiddleman.NewTCPConnector(targetURL.Host)
-
-	case "tls", "https":
-		// TLSConnector needs a tls.Config to establish TLS connections
-		if *listenerType != "tls" {
-			log.Fatalf("TLS connector requires tls proxy type")
+	defer func() {
+		if err := listener.Close(); err != nil {
+			log.Fatalf("Failed to close listener: %v", err)
 		}
-		tlsConfig := gomiddleman.LoadTLSConfig(*certFile, *keyFile, *caFile)
-		connector = gomiddleman.NewTLSConnector(targetURL.Host, tlsConfig)
+	}()
 
-	default:
-		log.Fatalf("Unsupported target scheme: %s", targetURL.Scheme)
+	connector, err := connectors.NewConnector(*target, tlsConfig)
+	if err != nil {
+		log.Fatalf("Failed to initialize target connector: %v", err)
 	}
 
 	if err := gomiddleman.StartProxy(listener, connector); err != nil {
-		log.Fatalf("Error when starting the proxy: %v", err)
+		log.Fatalf("Error when starting the proxyutils: %v", err)
 	}
 
 	// Setup signal handling for graceful shutdown
@@ -77,7 +60,7 @@ func main() {
 
 	<-shutdown
 
-	log.Println("Shutting down proxy...")
+	log.Println("Shutting down proxyutils...")
 	if err := listener.Close(); err != nil {
 		log.Printf("Failed to close listener: %v", err)
 	}

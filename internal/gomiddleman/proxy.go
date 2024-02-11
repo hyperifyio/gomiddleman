@@ -4,24 +4,33 @@ package gomiddleman
 
 import (
 	"fmt"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/connectors"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/listeners"
+	"github.com/hyperifyio/gomiddleman/internal/gomiddleman/proxyutils"
 	"log"
 	"net"
 )
 
 // StartProxy starts the proxy server and returns a function to stop it.
-func StartProxy(listener Listener, connector Connector) error {
+func StartProxy(listener listeners.Listener, connector connectors.Connector) error {
 
 	handleConnection := func(clientConn net.Conn) {
 		handler := listener.NewConnectionHandler()
-		handleConnection(clientConn, handler, connector)
+		proxyutils.HandleConnection(clientConn, handler, connector)
 	}
 
 	// Start listening for connections
 	if err := listener.Listen(handleConnection); err != nil {
-		return fmt.Errorf("Error in listen: %v", err)
+		return fmt.Errorf("[StartProxy]: Error in listen: %v", err)
 	}
 
-	log.Printf("Proxy listening on %s and forwarding to %s", listener.GetAddress(), connector.GetTarget())
+	log.Printf(
+		"[StartProxy]: Proxy listening on %s (%s) and forwarding to %s (%s)",
+		listener.GetAddress(),
+		listener.GetType(),
+		connector.GetTarget(),
+		connector.GetType(),
+	)
 
 	return nil
 }

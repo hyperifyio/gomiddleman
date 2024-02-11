@@ -1,6 +1,6 @@
 // Copyright (c) 2024. Heusala Group Oy <info@heusalagroup.fi>. All rights reserved.
 
-package gomiddleman
+package connectionhandlers
 
 import "net"
 
@@ -13,16 +13,16 @@ func NewTCPConnectionHandler() *TCPConnectionHandler {
 // Handle For now, TCP connections do not require additional setup.
 //
 //	Future checks or setup can be implemented here.
-func (h *TCPConnectionHandler) Handle(conn net.Conn) error {
+func (handle *TCPConnectionHandler) Handle(_ net.Conn) error {
 	return nil
 }
 
 // GetCommonName TCP connections might not have a common name.
-func (h *TCPConnectionHandler) GetCommonName() string {
+func (handle *TCPConnectionHandler) GetCommonName() string {
 	return "n/a"
 }
 
 // GetSerialNumber TCP connections might not have a serial number.
-func (h *TCPConnectionHandler) GetSerialNumber() string {
+func (handle *TCPConnectionHandler) GetSerialNumber() string {
 	return "n/a"
 }
