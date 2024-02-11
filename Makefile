@@ -1,7 +1,20 @@
 .PHONY: build clean tidy
 
-GOMIDDLEMAN_SOURCES := ./cmd/gomiddleman/main.go \
-	./internal/gomiddleman/proxy.go
+GOMIDDLEMAN_SOURCES := \
+    ./internal/gomiddleman/connectionhandler.go \
+    ./internal/gomiddleman/loadtlsconfig.go \
+    ./internal/gomiddleman/tcplistener.go \
+    ./internal/gomiddleman/connector.go \
+    ./internal/gomiddleman/proxy.go \
+    ./internal/gomiddleman/tlsconnectionhandler.go \
+    ./internal/gomiddleman/forwardtraffic.go \
+    ./internal/gomiddleman/tlsconnector.go \
+    ./internal/gomiddleman/handleconnection.go \
+    ./internal/gomiddleman/tcpconnectionhandler.go \
+    ./internal/gomiddleman/tlslistener.go \
+    ./internal/gomiddleman/listener.go \
+    ./internal/gomiddleman/tcpconnector.go \
+    ./cmd/gomiddleman/main.go
 
 all: build
 

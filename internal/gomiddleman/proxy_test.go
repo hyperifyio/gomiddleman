@@ -5,11 +5,13 @@ package gomiddleman
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 	"time"
 )
@@ -18,7 +20,7 @@ import (
 func TestProxyForwarding(t *testing.T) {
 
 	// Load the certificate
-	certData, err := ioutil.ReadFile("../../cert.pem")
+	certData, err := os.ReadFile("../../cert.pem")
 	if err != nil {
 		t.Fatalf("Failed to read certificate file: %v", err)
 	}
@@ -58,11 +60,21 @@ func TestProxyForwarding(t *testing.T) {
 		t.Fatalf("Failed to parse mock server URL: %v", err)
 	}
 
-	stopProxy := StartProxy("8080", mockServerURL.Host, tlsConfig)
-	defer stopProxy()
+	listenPort := "8080"
+	listenAddr := fmt.Sprintf(":%s", listenPort)
+	targetAddr := fmt.Sprintf("https://localhost:%s", listenPort)
+
+	listener := NewTLSListener(listenAddr, tlsConfig)
+	defer listener.Close()
+
+	connector := NewTCPConnector(mockServerURL.Host)
+
+	if err := StartProxy(listener, connector); err != nil {
+		log.Fatalf("Error when starting the proxy: %v", err)
+	}
 
 	// Make an HTTP request through the proxy to the mock server
-	resp, err := client.Get("https://localhost:8080")
+	resp, err := client.Get(targetAddr)
 	if err != nil {
 		t.Fatalf("Failed to make request through proxy: %v", err)
 	}
