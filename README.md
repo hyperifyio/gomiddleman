@@ -8,6 +8,17 @@ authenticated and encrypted without compromising on performance.
 
 See our development status from [Issue 1](https://github.com/hyperifyio/gomiddleman/issues/1).
 
+## Problem Addressed by the Tool
+
+Our Java application lacked the capability for dynamic configuration updates, 
+particularly for certificate revocation list (CRL) changes, requiring 
+time-consuming restarts for each update. To overcome this limitation and avoid 
+operational downtime, we developed `gomiddleman` as a POC to handle CRL updates 
+and client certificate access control in real-time. This solution fills a gap in 
+available proxy software, offering enhanced security and operational efficiency 
+by ensuring immediate response to compromised certificates without disrupting 
+the application's availability.
+
 ## Quick Start Guide
 
 To get started with `gomiddleman`, download the latest release for your operating
